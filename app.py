@@ -1,26 +1,53 @@
 import sqlite3
 
-# Connect to the database file
-conn = sqlite3.connect('FridayProj5.db')
-cursor = conn.cursor()
-
-# Get the name of the table in the database
-cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-table_name = cursor.fetchone()[0]
-
-# Retrieve questions and answers from the database table
-cursor.execute(f"SELECT question, answer FROM {table_name};")
-questions = cursor.fetchall()
-
-# Iterate over the retrieved questions and answers
-for question, answer in questions:
-    print(question)
-    user_answer = input("Your answer: ")
-    
-    if user_answer.lower() == answer.lower():
-        print("Correct!\n")
+def display_feedback(is_correct):
+    if is_correct:
+        print("\033[92mCorrect!\033[0m\n")
     else:
-        print(f"Wrong! The correct answer is {answer}\n")
+        print("\033[91mWrong! Try again.\033[0m\n")
 
-# Close the database connection
-conn.close()
+def play_quiz(category):
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
+    cursor.execute(f"SELECT question, answer FROM {category};")
+    questions = cursor.fetchall()
+
+    for question, answer in questions:
+        print(question)
+        user_answer = input("Your answer: ")
+
+        if user_answer.lower() == answer.lower():
+            display_feedback(True)
+        else:
+            display_feedback(False)
+
+    conn.close()
+
+def main():
+    print("Categories:")
+    print("1. General Geography")
+    print("2. General History")
+    print("3. Accounting")
+    print("4. Math")
+    print("5. Programming")
+
+    category_map = {
+        '1': 'GeneralGeography',
+        '2': 'GeneralHistory',
+        '3': 'Accounting',
+        '4': 'Math',
+        '5': 'Programming'
+    }
+
+    while True:
+        choice = input("Select a category (1-5): ")
+        if choice in category_map:
+            category = category_map[choice]
+            play_quiz(category)
+            break
+        else:
+            print("Invalid choice. Please select a valid category.")
+
+if __name__ == "__main__":
+    main()
